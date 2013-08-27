@@ -71,6 +71,19 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
         }
     }
 
+    /**
+     * 判断是否能找到对应的分片数据
+     * @param statementName
+     * @param parameterObject
+     * @return
+     */
+    public boolean isHasShard(final String statementName) {
+    	Set<Shard> shards = getRouter().route(statementName, null);
+        if (shards.size() == 1) {
+        	return true;
+        }
+        return false;
+    }
 
     @Override
     public int delete(String statementName) throws DataAccessException {

@@ -9,6 +9,8 @@ public class Shard {
     private String id;
     private DataSource dataSource;
     private String description;
+    
+    public Shard() {}
 
     public Shard(String id, DataSource dataSource, String description) {
         this.id = id;
