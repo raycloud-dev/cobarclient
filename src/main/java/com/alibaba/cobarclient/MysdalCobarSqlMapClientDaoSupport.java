@@ -127,10 +127,14 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
     }
 
     protected boolean isPartitionBehaviorEnabled(String statementName) {
-        if (getSqlMapClientTemplate() instanceof MysdalSqlMapClientTemplate) {
+        /*
+         * if (getSqlMapClientTemplate() instanceof MysdalSqlMapClientTemplate) {
             return ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate())
                     .isHasShard(statementName);
         }
-        return false;
+         * */
+    	//在router里对每一次insert都有判断。这里先暂时全部走true。
+    	//TODO 性能不好，因为每一条都要去校验，后面再做一种只校验一次后面全部不校验的作法
+        return true;
     }
 }
