@@ -1,19 +1,5 @@
 package com.alibaba.cobarclient.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.io.Resource;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-
 import com.alibaba.cobarclient.Shard;
 import com.alibaba.cobarclient.config.vo.InternalRule;
 import com.alibaba.cobarclient.config.vo.InternalRules;
@@ -22,8 +8,15 @@ import com.alibaba.cobarclient.route.Route;
 import com.alibaba.cobarclient.route.Router;
 import com.alibaba.cobarclient.route.SimpleRouter;
 import com.thoughtworks.xstream.XStream;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.Resource;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
-public class SimpleRouterFactoryBean implements FactoryBean, InitializingBean {
+import java.util.*;
+
+public class SimpleRouterFactoryBean implements FactoryBean<Router>, InitializingBean {
 
 	private Resource configLocation;
 	private Resource[] configLocations;
@@ -56,8 +49,8 @@ public class SimpleRouterFactoryBean implements FactoryBean, InitializingBean {
 		if(!CollectionUtils.isEmpty(allRules)) {
 			Map<String, Shard> shardMap = convertShardMap(shards);
 			Set<Route> routes = new LinkedHashSet<Route>();
-			Route route = null;
-			Set<Shard> subShard = null;
+			Route route;
+			Set<Shard> subShard;
 			for (InternalRule rule : allRules) {
 				String sqlmap = rule.getSqlmap();
 				if(sqlmap == null || sqlmap.equals("")) {
@@ -98,11 +91,10 @@ public class SimpleRouterFactoryBean implements FactoryBean, InitializingBean {
 
 		InternalRules internalRules = (InternalRules) xstream
 				.fromXML(configLocation.getInputStream());
-		List<InternalRule> rules = internalRules.getRules();
-		return rules;
+        return internalRules.getRules();
 	}
 
-	public Object getObject() throws Exception {
+	public Router getObject() throws Exception {
 		return router;
 	}
 
