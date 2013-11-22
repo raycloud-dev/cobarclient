@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package com.alibaba.cobarclient;
+package com.alibaba.cobarclient;
 
-import java.sql.SQLException;
-import java.util.Collection;
-
+import com.ibatis.sqlmap.client.SqlMapExecutor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.ibatis.SqlMapClientCallback;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
-import com.ibatis.sqlmap.client.SqlMapExecutor;
+import java.sql.SQLException;
+import java.util.Collection;
 
 /**
- * A DAO base class definition which adds more helper methods on batch
- * operations.<br>
- * Users can configure their DAO implementations with same configuration items
- * of {@link CobarSqlMapClientTemplate}.<br>
- * <br>
- * Feature requested by Wangyi
- * 
+ * A DAO base class definition which adds more helper methods on batch operations.<br> Users can configure their DAO
+ * implementations with same configuration items of {@link MysdalSqlMapClientTemplate}.<br> <br> Feature requested by
+ * Wangyi
+ *
  * @author fujohnwang, update by Wangyi
  * @since 1.0
  */
@@ -127,14 +123,14 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
     }
 
     protected boolean isPartitionBehaviorEnabled(String statementName) {
-        /*
-         * if (getSqlMapClientTemplate() instanceof MysdalSqlMapClientTemplate) {
+
+        if (getSqlMapClientTemplate() instanceof MysdalSqlMapClientTemplate) {
             return ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate())
                     .isHasShard(statementName);
         }
-         * */
-    	//在router里对每一次insert都有判断。这里先暂时全部走true。
-    	//TODO 性能不好，因为每一条都要去校验，后面再做一种只校验一次后面全部不校验的作法
+
+        //在router里对每一次insert都有判断。这里先暂时全部走true。
+        //TODO 性能不好，因为每一条都要去校验，后面再做一种只校验一次后面全部不校验的作法
         return true;
     }
 }

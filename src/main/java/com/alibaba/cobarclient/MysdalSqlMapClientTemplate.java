@@ -55,8 +55,8 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
         if (executor == null) {
             useDefaultExecutor = true;
             executor = Executors.newCachedThreadPool(new ThreadFactory() {
-                public Thread newThread(Runnable r) {
-                    return new Thread(r, "MysdalSqlMapClientTemplate executor thread");
+                public Thread newThread(Runnable runnable) {
+                    return new Thread(runnable, "MysdalSqlMapClientTemplate executor thread");
                 }
             });
         }
@@ -74,7 +74,6 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
     /**
      * 判断是否能找到对应的分片数据
      * @param statementName
-     * @param parameterObject
      * @return
      */
     public boolean isHasShard(final String statementName) {
@@ -97,7 +96,7 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
         if (shards.size() == 1) {
             return CURRENT_THREAD_SQLMAP_CLIENT_TEMPLATES.get(shards.iterator().next().getId()).delete(statementName, parameterObject);
         } else {
-            List results = execute(shards, new SqlMapClientCallback<Integer>() {
+            List<Integer> results = execute(shards, new SqlMapClientCallback<Integer>() {
                 public Integer doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
                     return executor.delete(statementName, parameterObject);
                 }
@@ -183,9 +182,9 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
     /**
      * collection and flatten the result list
      */
-    protected List queryForListBase(Set<Shard> shards, SqlMapClientCallback<List> callback) {
+    protected List<Object> queryForListBase(Set<Shard> shards, SqlMapClientCallback<List> callback) {
         List<List> results = execute(shards, callback);
-        List resultList = new ArrayList();         // FLATTEN the list, miss FP pattern here.
+        List<Object> resultList = new ArrayList<Object>();         // FLATTEN the list, miss FP pattern here.
         for (List lst : results) {
             resultList.addAll(lst);
         }
@@ -325,7 +324,7 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
 
     protected <T> List<T> execute(Set<Shard> shards, final SqlMapClientCallback<T> callback) {
         MultipleCauseException exceptions = new MultipleCauseException();
-        Map<String, ResourceBundle> executionContext = new HashMap<String, ResourceBundle>();
+        Map<String, ResourceBundle<T>> executionContext = new HashMap<String, ResourceBundle<T>>();
 
         for (Shard shard : shards) {
             try {
@@ -345,7 +344,7 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
                         }
                     }
                 });
-                executionContext.put(shard.getId(), new ResourceBundle(connection, shard.getDataSource(), future));
+                executionContext.put(shard.getId(), new ResourceBundle<T>(connection, shard.getDataSource(), future));
             } catch (Exception ex) {
                 exceptions.add(ex);
             }
@@ -353,7 +352,7 @@ public class MysdalSqlMapClientTemplate extends SqlMapClientTemplate implements 
 
         List<T> resultList = new ArrayList<T>();
 
-        for (Map.Entry<String, ResourceBundle> entry : executionContext.entrySet()) {
+        for (Map.Entry<String, ResourceBundle<T>> entry : executionContext.entrySet()) {
             ResourceBundle<T> bundle = entry.getValue();
             try {
                 resultList.add(bundle.getFuture().get(timeout, TimeUnit.MILLISECONDS));
