@@ -1,6 +1,8 @@
 cobarclient
 ============
 
+1. 增加分表
+
 
 `mvn install` will package everything for you, including the documentations, the libraries, etc.
 
