@@ -64,10 +64,14 @@ public class SimpleRouterFactoryBean implements FactoryBean<Router>, Initializin
                     }
                     subShard.add(tempShard);
                 }
-                if (null == functions) {
-                    functions = new HashMap<String, Object>();
+                if (null != rule.getShardingExpression()) {
+                    if (null == functions) {
+                        functions = new HashMap<String, Object>();
+                    }
+                    route = new Route(sqlmap, new MVELExpression(rule.getShardingExpression(), functions), subShard);
+                } else {
+                    route = new Route(sqlmap, null, subShard);
                 }
-                route = new Route(sqlmap, new MVELExpression(rule.getShardingExpression(), functions), subShard);
                 routes.add(route);
             }
 

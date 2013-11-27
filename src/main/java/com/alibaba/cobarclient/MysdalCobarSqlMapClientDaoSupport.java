@@ -45,21 +45,9 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
 
     public int batchInsert(final String statementName, final Collection<?> entities)
             throws DataAccessException {
-        if (isPartitionBehaviorEnabled(statementName)) {
-            int counter = 0;
-            DataAccessException lastEx = null;
-            for (Object parameterObject : entities) {
-                try {
-                    getSqlMapClientTemplate().insert(statementName, parameterObject);
-                    counter++;
-                } catch (DataAccessException e) {
-                    lastEx = e;
-                }
-            }
-            if (lastEx != null) {
-                throw lastEx;
-            }
-            return counter;
+        if (isPartitionBehaviorEnabled()) {
+            MysdalSqlMapClientTemplate template = ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate());
+            return template.batchInsert(statementName, entities);
         } else {
             return (Integer) getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
                 public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
@@ -75,26 +63,15 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
 
     public int batchDelete(final String statementName, final Collection<?> entities)
             throws DataAccessException {
-        if (isPartitionBehaviorEnabled(statementName)) {
-            int counter = 0;
-            DataAccessException lastEx = null;
-            for (Object entity : entities) {
-                try {
-                    counter += getSqlMapClientTemplate().delete(statementName, entity);
-                } catch (DataAccessException e) {
-                    lastEx = e;
-                }
-            }
-            if (lastEx != null) {
-                throw lastEx;
-            }
-            return counter;
+        if (isPartitionBehaviorEnabled()) {
+            MysdalSqlMapClientTemplate template = ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate());
+            return template.batchDelete(statementName, entities);
         } else {
             return (Integer) getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
                 public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
                     executor.startBatch();
-                    for (Object parameterObject : entities) {
-                        executor.delete(statementName, parameterObject);
+                    for (Object item : entities) {
+                        executor.delete(statementName, item);
                     }
                     return executor.executeBatch();
                 }
@@ -104,27 +81,15 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
 
     public int batchUpdate(final String statementName, final Collection<?> entities)
             throws DataAccessException {
-        if (isPartitionBehaviorEnabled(statementName)) {
-            int counter = 0;
-            DataAccessException lastEx = null;
-            for (Object parameterObject : entities) {
-                try {
-                    counter += getSqlMapClientTemplate().update(statementName, parameterObject);
-                } catch (DataAccessException e) {
-                    lastEx = e;
-                }
-            }
-            if (lastEx != null) {
-                throw lastEx;
-            }
-            return counter;
+        if (isPartitionBehaviorEnabled()) {
+            MysdalSqlMapClientTemplate template = ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate());
+            return template.batchUpdate(statementName, entities);
         } else {
             return (Integer) getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
-
                 public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
                     executor.startBatch();
-                    for (Object parameterObject : entities) {
-                        executor.update(statementName, parameterObject);
+                    for (Object item : entities) {
+                        executor.update(statementName, item);
                     }
                     return executor.executeBatch();
                 }
@@ -132,15 +97,10 @@ public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
         }
     }
 
-    protected boolean isPartitionBehaviorEnabled(String statementName) {
-
+    protected boolean isPartitionBehaviorEnabled() {
         if (getSqlMapClientTemplate() instanceof MysdalSqlMapClientTemplate) {
-            return ((MysdalSqlMapClientTemplate) getSqlMapClientTemplate())
-                    .isHasShard(statementName);
+            return true;
         }
-
-        //在router里对每一次insert都有判断。这里先暂时全部走true。
-        //TODO 性能不好，因为每一条都要去校验，后面再做一种只校验一次后面全部不校验的作法
-        return true;
+        return false;
     }
 }
