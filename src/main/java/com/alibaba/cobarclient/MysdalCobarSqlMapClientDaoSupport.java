@@ -16,10 +16,13 @@
 package com.alibaba.cobarclient;
 
 import com.ibatis.sqlmap.client.SqlMapExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.ibatis.SqlMapClientCallback;
+import org.springframework.orm.ibatis.SqlMapClientTemplate;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
+import javax.annotation.PostConstruct;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -32,6 +35,13 @@ import java.util.Collection;
  * @since 1.0
  */
 public class MysdalCobarSqlMapClientDaoSupport extends SqlMapClientDaoSupport {
+    @Autowired
+    private SqlMapClientTemplate sqlMapClientTemplate = new SqlMapClientTemplate();
+
+    @PostConstruct
+    public void init() {
+        setSqlMapClientTemplate(sqlMapClientTemplate);
+    }
 
     public int batchInsert(final String statementName, final Collection<?> entities)
             throws DataAccessException {
