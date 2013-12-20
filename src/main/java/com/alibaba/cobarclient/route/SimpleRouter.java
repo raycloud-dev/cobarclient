@@ -18,12 +18,12 @@ public class SimpleRouter implements Router {
 
     public SimpleRouter(Set<Route> routeSet) {
         if (!(routeSet == null || routeSet.isEmpty())) {
-            for (Route r : routeSet) {
-                if (!routes.containsKey(r.getSqlmap())) routes.put(r.getSqlmap(), new RouteGroup());
-                if (r.getExpression() == null)
-                    routes.get(r.getSqlmap()).setFallbackRoute(r);
+            for (Route route : routeSet) {
+                if (!routes.containsKey(route.getSqlmap())) routes.put(route.getSqlmap(), new RouteGroup());
+                if (route.getExpression() == null)
+                    routes.get(route.getSqlmap()).setFallbackRoute(route);
                 else
-                    routes.get(r.getSqlmap()).getSpecificRoutes().add(r);
+                    routes.get(route.getSqlmap()).getSpecificRoutes().add(route);
             }
         }
     }
