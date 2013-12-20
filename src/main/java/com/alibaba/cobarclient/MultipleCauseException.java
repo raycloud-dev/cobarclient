@@ -19,5 +19,4 @@ public class MultipleCauseException extends Throwable {
     public List<Throwable> getCauses() {
         return new ArrayList<Throwable>(this.causes);
     }
-
 }

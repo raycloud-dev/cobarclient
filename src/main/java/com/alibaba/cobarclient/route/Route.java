@@ -5,9 +5,6 @@ import com.alibaba.cobarclient.expr.Expression;
 
 import java.util.Set;
 
-/**
- * Created with IntelliJ IDEA.
- */
 public class Route {
     private String sqlmap;
     private Expression expression;
